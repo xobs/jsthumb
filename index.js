@@ -59,6 +59,7 @@ fs.readFile('hello.bin', null, function (err, flash) {
         return;
     }
 
+    // Load the file into the CPU at the specified address.
     for (var i = 0; i < flash.length; i++) {
         thumbCpu.writeb(0x5900 + i, flash[i], {
             flash_we: true
@@ -66,13 +67,14 @@ fs.readFile('hello.bin', null, function (err, flash) {
     }
 
     var header = readAppHeader(thumbCpu, 0x5900);
-    printAppHeader(header);
+    //printAppHeader(header);
     loadApp(thumbCpu, header);
 
     thumbCpu.registerSvc(129, function(cpu) {
         cpu.store('pc', cpu.load('lr'));
     });
 
+    console.log('CPU Starting Condition:');
     thumbCpu.print();
 
     try {

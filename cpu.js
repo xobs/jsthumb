@@ -183,13 +183,813 @@ Thumb2CPU.prototype = {
         }
     },
 
-    print: function () {
-        for (var i = 0; i <= 12; i++) {
-            console.log('r' + i + ': 0x' + this['r' + i].toString(16));
+    instructionDecodeTable16: [
+        {
+            mask: 0xffc0,
+            value: 0x0000,
+            mnemonic: 'mov',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x03,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4000,
+            mnemonic: 'and',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4040,
+            mnemonic: 'eor',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4080,
+            mnemonic: 'lsl',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x40c0,
+            mnemonic: 'lsr',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4100,
+            mnemonic: 'asr',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4140,
+            mnemonic: 'adc',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4180,
+            mnemonic: 'sbc',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x41c0,
+            mnemonic: 'ror',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4200,
+            mnemonic: 'tst',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4240,
+            mnemonic: 'rsb',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4280,
+            mnemonic: 'cmp',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x42c0,
+            mnemonic: 'cmn',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4300,
+            mnemonic: 'orr',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4340,
+            mnemonic: 'mul',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x4380,
+            mnemonic: 'bic',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            mask: 0xffc0,
+            value: 0x43c0,
+            mnemonic: 'mvn',
+            rm: 0x38,
+            rn: 0x7,
+            rd: 0x7,
+            imm: 0
+        },
+        {
+            description: 'Sign extend halfword',
+            mask: 0xffc0,
+            value: 0xb200,
+            mnemonic: 'sxth',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x7,
+            imm: 0,
+        },
+        {
+            description: 'Sign extend byte',
+            mask: 0xffc0,
+            value: 0xb240,
+            mnemonic: 'sxtb',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x7,
+            imm: 0,
+        },
+        {
+            description: 'Unsigned extend halfword',
+            mask: 0xffc0,
+            value: 0xb280,
+            mnemonic: 'uxth',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x7,
+            imm: 0,
+        },
+        {
+            description: 'Unsigned extend byte',
+            mask: 0xffc0,
+            value: 0xb2c0,
+            mnemonic: 'uxtb',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x7,
+            imm: 0,
+        },
+        {
+            mask: 0xff80,
+            value: 0x4700,
+            mnemonic: 'bx',
+            rm: 0x78,
+            rn: 0,
+            rd: 0,
+            imm: 0
+        },
+        {
+            mask: 0xff80,
+            value: 0x4780,
+            mnemonic: 'blx',
+            rm: 0x78,
+            rn: 0,
+            rd: 0,
+            imm: 0
+        },
+        {
+            description: 'Add to SP',
+            mask: 0xff80,
+            value: 0xb000,
+            mnemonic: 'add'
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0x7f
+        },
+        {
+            description: 'Subtract from SP',
+            mask: 0xff80,
+            value: 0xb080,
+            mnemonic: 'sub'
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0x7f
+        },
+        {
+            mask: 0xff00,
+            value: 0x4400,
+            mnemonic: 'add',
+            rm: 0x78,
+            rn: 0x83,
+            rd: 0x83,
+            imm: 0
+        },
+        {
+            // Special data processing
+            mask: 0xff00,
+            value: 0x4500,
+            mnemonic: 'cmp',
+            rm: 0x78,
+            rn: 0x83,
+            rd: 0x83,
+            imm: 0
+        },
+        {
+            mask: 0xff00,
+            value: 0x4600,
+            mnemonic: 'mov',
+            rm: 0x78,
+            rn: 0x83,
+            rd: 0x83,
+            imm: 0
+        },
+        {
+            description: 'Branch if equal',
+            mask: 0xff00,
+            value: 0xd00,
+            mnemonic: 'beq',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if equal',
+            mask: 0xff00,
+            value: 0xd000,
+            mnemonic: 'beq',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if not equal',
+            mask: 0xff00,
+            value: 0xd100,
+            mnemonic: 'bne',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if carry set',
+            mask: 0xff00,
+            value: 0xd200,
+            mnemonic: 'bcs',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if carry clear',
+            mask: 0xff00,
+            value: 0xd300,
+            mnemonic: 'bcc',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if negative',
+            mask: 0xff00,
+            value: 0xd400,
+            mnemonic: 'bmi',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if positive-or-zero',
+            mask: 0xff00,
+            value: 0xd500,
+            mnemonic: 'bpl',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if overflow',
+            mask: 0xff00,
+            value: 0xd600,
+            mnemonic: 'bvs',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if no overflow',
+            mask: 0xff00,
+            value: 0xd700,
+            mnemonic: 'bvc',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if unsigned higher',
+            mask: 0xff00,
+            value: 0xd800,
+            mnemonic: 'bhi',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if unsigned lower or the same',
+            mask: 0xff00,
+            value: 0xd900,
+            mnemonic: 'bls',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if signed greater than or equal',
+            mask: 0xff00,
+            value: 0xda00,
+            mnemonic: 'bgt',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if signed less than',
+            mask: 0xff00,
+            value: 0xdb00,
+            mnemonic: 'blt',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if signed greater than',
+            mask: 0xff00,
+            value: 0xdc00,
+            mnemonic: 'bgr',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch if signed less than or equal',
+            mask: 0xff00,
+            value: 0xdd00,
+            mnemonic: 'ble',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch always',
+            mask: 0xff00,
+            value: 0xde00,
+            mnemonic: 'bal',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Branch always',
+            mask: 0xff00,
+            value: 0xdf00,
+            mnemonic: 'b',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            mask: 0xff00,
+            value: 0xdf00,
+            mnemonic: 'svc',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            mask: 0xff00,
+            value: 0xbe00,
+            mnemonic: 'bkpt',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            mask: 0xfe00,
+            value: 0x1800,
+            mnemonic: 'add',
+            rm: 0x1c0,
+            rn: 0x38,
+            rd: 0x70,
+            imm: 0
+        },
+        {
+            mask: 0xfe00,
+            value: 0x1a00,
+            mnemonic: 'sub',
+            rm: 0x1c0,
+            rn: 0x38,
+            rd: 0x70,
+            imm: 0
+        },
+        {
+            mask: 0xfe00,
+            value: 0x1c00,
+            mnemonic: 'add',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x70,
+            imm: 0x1c0
+        },
+        {
+            // Subtract immediate
+            mask: 0xfe00,
+            value: 0x1e00,
+            mnemonic: 'sub',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x70,
+            imm: 0x1c0
+        },
+        {
+            // Store word (Register offset)
+            mask: 0xfe00,
+            value: 0x5000,
+            mnemonic: 'str',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Store halfword (Register offset)
+            mask: 0xfe00,
+            value: 0x5200,
+            mnemonic: 'strh',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Store byte (Register offset)
+            mask: 0xfe00,
+            value: 0x5400,
+            mnemonic: 'strb',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Load signed byte (Register offset)
+            mask: 0xfe00,
+            value: 0x5600,
+            mnemonic: 'ldrsb',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Load word (Register offset)
+            mask: 0xfe00,
+            value: 0x5800,
+            mnemonic: 'ldr',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Load halfword (Register offset)
+            mask: 0xfe00,
+            value: 0x5a00,
+            mnemonic: 'ldrh',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Load byte (Register offset)
+            mask: 0xfe00,
+            value: 0x5c00,
+            mnemonic: 'ldrb',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            // Load signed halfword (Register offset)
+            mask: 0xfe00,
+            value: 0x5e00,
+            mnemonic: 'ldrsh',
+            rm: 0x1c0,
+            rn: 0x038,
+            rd: 0x007,
+            imm: 0
+        },
+        {
+            mask: 0xf800,
+            value: 0x0000,
+            mnemonic: 'lsl',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x03,
+            imm: 0x7c
+        },
+        {
+            mask: 0xf800,
+            value: 0x0800,
+            mnemonic: 'lsr',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x03,
+            imm: 0x7c
+        },
+        {
+            // Arithmetic shift right
+            mask: 0xf800,
+            value: 0x1000,
+            mnemonic: 'asr',
+            rm: 0x38,
+            rn: 0,
+            rd: 0x03,
+            imm: 0x7c
+        },
+        {
+            // Move immediate
+            mask: 0xf800,
+            value: 0x2000,
+            mnemonic: 'mov',
+            rm: 0,
+            rn: 0x700,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            // Compare immediate
+            mask: 0xf800,
+            value: 0x2800,
+            mnemonic: 'cmp',
+            rm: 0,
+            rn: 0x700,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            // Add immediate
+            mask: 0xf800,
+            value: 0x3000,
+            mnemonic: 'add',
+            rm: 0,
+            rn: 0x700,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            // Subtract immediate
+            mask: 0xf800,
+            value: 0x3800,
+            mnemonic: 'sub',
+            rm: 0,
+            rn: 0x700,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            // Load from literal pool
+            mask: 0xf800,
+            value: 0x4800,
+            mnemonic: 'ldr',
+            rm: 0,
+            rn: 0,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            // Load word immediate offset
+            mask: 0xf800,
+            value: 0x6000,
+            mnemonic: 'ldr',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            // Store word immediate offset
+            mask: 0xf800,
+            value: 0x6800,
+            mnemonic: 'str',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            // Load byte immediate offset
+            mask: 0xf800,
+            value: 0x7000,
+            mnemonic: 'ldrb',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            // Store byte immediate offset
+            mask: 0xf800,
+            value: 0x7800,
+            mnemonic: 'strb',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            // Load halfword immediate offset
+            mask: 0xf800,
+            value: 0x8000,
+            mnemonic: 'ldrh',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            // Store halfword immediate offset
+            mask: 0xf800,
+            value: 0x8800,
+            mnemonic: 'strh',
+            rm: 0,
+            rn: 0x38,
+            rd: 0x07,
+            imm: 0x7c0
+        },
+        {
+            description: 'Load word from stack offset',
+            mask: 0xf800,
+            value: 0x9000,
+            mnemonic: 'ldr',
+            rm: 0,
+            rn: 0,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            description: 'Store word to stack offset',
+            mask: 0xf800,
+            value: 0x9800,
+            mnemonic: 'str',
+            rm: 0,
+            rn: 0,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            description: 'Add immediate to PC',
+            mask: 0xf800,
+            value: 0xa000,
+            mnemonic: 'add',
+            rm: 0,
+            rn: 0,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            description: 'Add immediate to SP',
+            mask: 0xf800,
+            value: 0xa800,
+            mnemonic: 'add',
+            rm: 0,
+            rn: 0,
+            rd: 0x700,
+            imm: 0xff
+        },
+        {
+            description: 'Load multiple',
+            mask: 0xf800,
+            value: 0xc000,
+            mnemonic: 'ldmia',
+            rm: 0,
+            rn: 0x700,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Load multiple',
+            mask: 0xf800,
+            value: 0xc800,
+            mnemonic: 'stmia',
+            rm: 0,
+            rn: 0x700,
+            rd: 0,
+            imm: 0xff
+        },
+        {
+            description: 'Unconditional branch',
+            mask: 0xf800,
+            value: 0xe000,
+            mnemonic: 'b',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0x7ff
+        },
+        {
+            description: '32-bit instruction',
+            mask: 0xf800,
+            value: 0xe800,
+            mnemonic: '32-bit',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0
+        },
+        {
+            description: '32-bit instruction',
+            mask: 0xf000,
+            value: 0xf000,
+            mnemonic: '32-bit',
+            rm: 0,
+            rn: 0,
+            rd: 0,
+            imm: 0
         }
-        console.log('sp: 0x' + this.load('sp').toString(16));
-        console.log('lr: 0x' + this.load('lr').toString(16));
-        console.log('pc: 0x' + this.load('pc').toString(16));
+    ],
+    instructionDecode: function(opcode) {
+        
+    },
+
+    print: function () {
+        console.log('CPU state:');
+        for (var i = 0; i <= 12; i += 2) {
+            console.log('    r' + i + ': 0x' + this['r' + i].toString(16) +
+                        '    r' + i + ': 0x' + this['r' + i].toString(16));
+        }
+        console.log('    sp: 0x' + this.load('sp').toString(16));
+        console.log('    lr: 0x' + this.load('lr').toString(16));
+        console.log('    pc: 0x' + this.load('pc').toString(16));
     },
 
     registerSvc: function(n, cb) {
@@ -259,7 +1059,8 @@ Thumb2CPU.prototype = {
 
         // Other 16-bit instruction
         else {
-            // SVC
+            // SVC - 0b1101 1111 mmmm mmmm
+            //   m : 8-bit immediate
             if ((inst & 0xff00) === 0xdf00) {
                 var svc = inst & 0xff;
                 console.log('svc #' + svc);
@@ -268,6 +1069,7 @@ Thumb2CPU.prototype = {
                 }
                 this.svc[svc](this);
             }
+            else if ((inst & 0xff00) == 0xde00) {}
             // Branch / Exchange
             else if ((inst & 0xf800) === 0x4700) {
                 console.log('Rm: ' + inst & 0xff);
